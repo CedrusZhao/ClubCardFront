@@ -69,38 +69,7 @@ const data = [
 
 export default {
     name:"clubManager",
-    mounted(){
-       let ah  = this.$http.create({ baseURL: "http://localhost"})
-       console.log("mounted exec")
-         ah.post("/GetAllCard").then(rs=>{
-              console.log(rs.data)
-              this.data = rs.data.data
-            })
-    },
-     methods: {
-      open (link) {
-        this.$electron.shell.openExternal(link)
-      },
-      handleOk(){
-        let ah  = this.$http.create({ baseURL: "http://localhost"})
-        
-        ah.post("/AddCard",{ "Tel":this.tel,"Name":this.Cname,"Account":Number(this.account)}).then(rs=>{
-          this.visible = false
-          if (rs.data.ok==true){
-            ah.post("/GetAllCard").then(rs=>{
-              console.log(rs.data)
-              this.data = rs.data.data
-            })
-            this.$message.info('add card successfully');
-          }else{
-             this.$message.info('add card faild');
-          }
-         
-        })
-        
-      }
-    },
-    data(){
+  data(){
         return{
             input:"",
             data,
@@ -110,6 +79,36 @@ export default {
             Cname:"",
             account:1
         }
-    }
+    },
+     methods: {   
+    
+      open (link) {
+        this.$electron.shell.openExternal(link)
+      },
+      handleOk(){
+       
+        
+        this.COMMON.AddCard(this.tel,this.Cname,this.account).then(rs=>{
+          this.visible = false
+          if (rs.data.ok==true){
+            this.getAllCard()
+            this.$message.info('add card successfully');
+          }else{
+             this.$message.error('add card faild');
+          }
+         
+        })
+        
+      },
+      getAllCard(){
+          this.COMMON.GetAllCard().then(rs=>{    
+          this.data = rs.data.data
+          })
+      }
+    },
+      mounted(){
+         this.getAllCard()
+    },
+
 }
 </script>

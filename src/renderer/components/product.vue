@@ -21,11 +21,11 @@
             </a-row>
             <a-row style="margin-top:10px">
                 <a-col :span="3">价格</a-col>
-                <a-col :span="8"> <a-input v-model="price" placeholder="请输入内容"></a-input></a-col>
+                <a-col :span="8"> <a-input-number v-model="price" placeholder="请输入内容"></a-input-number></a-col>
             </a-row>
                <a-row style="margin-top:10px">
                 <a-col :span="3">库存</a-col>
-                <a-col :span="8"> <a-input v-model="account" placeholder="请输入内容"></a-input></a-col>
+                <a-col :span="8"> <a-input-number v-model="account" placeholder="请输入内容"></a-input-number></a-col>
             </a-row>
                 
             
@@ -41,20 +41,20 @@
 const columns = [
   {
     title: '商品名称',
-    dataIndex: 'name',
-    key: 'name',
+    dataIndex: 'Name',
+    key: 'Name',
    
    
   },
   {
     title: '价格',
-    dataIndex: 'price',
-    key: 'price',
+    dataIndex: 'Price',
+    key: 'Price',
   },
   {
     title: '剩余',
-    dataIndex: 'account',
-    key: 'account',
+    dataIndex: 'Num',
+    key: 'Num',
   },
   {
     title: '操作',
@@ -67,41 +67,64 @@ const columns = [
 const data = [
   {
     key: '1',
-    name: '洗衣粉',
-    price: 10,
-    account: 100,
+    Name: '洗衣粉',
+    Price: 10,
+    Num: 100,
     
   },
   {
     key: '2',
-    name: '购物袋',
-    price: 20,
-   account: 100,
+    Name: '购物袋',
+    Price: 20,
+   Num: 100,
   },
 
 ];
 
 export default {
     name:"produce",
-     methods: {
-      open (link) {
-        this.$electron.shell.openExternal(link)
-      },
-      handleOk(){
-        console.log("ok")
-      }
-    },
-    data(){
-        return{
-            input:"",
-             data,
+        data(){
+  return{
+      input:"",
+        data,
       columns,
       visible:false,
       productName:"",
       price:0,
       account:0
+       }
+    }, 
+    mounted(){
+         this.getAll()
+         
+       },
+     methods: {
+      
+      open (link) {
+        this.$electron.shell.openExternal(link)
+      },
+      handleOk(){
+        console.log("ok")
+       
+       
+        this.COMMON.ProductAdd(this.productName,this.price,this.account).then(res =>{
+          this.visible = false
+            if (res.data.ok){
+              this.$message.info('add product successlly');
+              this.getAll()
+            }else{
+              this.$message.error(res.data.err);
+              
+            }
+        })
+      },
+      getAll(){
+           
+         this.COMMON.ProductGetAll().then(res=>{
+           this.data = res.data.data
+         })
+      }
+    },
 
-        }
-    }
 }
 </script>

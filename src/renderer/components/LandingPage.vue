@@ -16,8 +16,11 @@
       <a-col span="3"><h2>共计2件</h2></a-col>
       <a-col span="3"><h2>总价60元</h2></a-col>
       <a-col span="3"><a-button>现金支付</a-button></a-col>
-       <a-col span="3"><a-button>刷卡支付</a-button></a-col>
+       <a-col span="3"><a-button v-on:click="pay">刷卡支付</a-button></a-col>
     </a-row>
+    <a-modal v-model="visible" title="支付结果" @ok="handleOk">
+      <p>{{this.payResult}}</p>
+    </a-modal>
   </div>
 </template>
 
@@ -52,17 +55,17 @@ const columns = [
 const data = [
   {
     key: '1',
-    name: '大购物袋',
-    price: 3.2,
+    name: 'bag',
+    price: 3,
     num: 10,
-    sum: 32,
+    sum: 30,
   },
   {
     key: '2',
-    name: '洗衣粉',
-    price: 4.2,
+    name: 'wash',
+    price: 3,
     num: 10,
-    sum: 42,
+    sum: 30,
   },
 
 ];
@@ -72,6 +75,8 @@ const data = [
 	  data(){
 	    return{
 		  data,
+      visible:false,
+      payResult:"付款成功",
       columns,
       input : ""
 		}
@@ -79,7 +84,22 @@ const data = [
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
+      },
+      pay(){
+        
+         this.COMMON.Pay(60,[{Name:"wash",Num:10,Price:3},{Name:"tag",Num:10,Price:3}]).then(res=>{
+           console.log(res)
+           if (!res.data.ok){
+             this.payResult=res.data.err
+             this.visible=true
+           }
+         })
+          
+      },
+      handleOk(){
+          this.visible=false
       }
+      
     }
   }
 </script>

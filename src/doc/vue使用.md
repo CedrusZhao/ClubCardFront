@@ -1,0 +1,1 @@
+template 应用脚本中的变量，不要加this

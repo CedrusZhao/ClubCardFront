@@ -6,9 +6,13 @@ import 'ant-design-vue/dist/antd.css';
 import App from './App'
 import router from './router'
 import store from './store'
-
+import global from './components/Common.vue'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
+
+
+    
+Vue.prototype.COMMON  = global
 Vue.config.productionTip = false
 Vue.use(Antd);
 // Vue.use(VueResource)
