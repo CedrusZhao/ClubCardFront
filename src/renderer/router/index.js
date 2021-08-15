@@ -26,10 +26,17 @@ export default new Router({
       component: require('@/components/product').default
     },
     {
-      path: '/',
+      path:'/login',
+      name:'login',
+      component:require('@/components/login').default
+    }
+    ,
+    {
+      path: '/sale',
       name: 'landing-page',
       component: require('@/components/LandingPage').default
     },
+    
     {
       path: '*',
       redirect: '/'

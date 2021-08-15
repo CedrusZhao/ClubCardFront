@@ -12,6 +12,9 @@ import axios from 'axios'
     function GetDayTurnOverByPage(pageIndex,pageType){
         return localHttp.post("/Order/GetDayTurnOverByPage",{"pageIndex":pageIndex,"pageType":pageType})
     }
+     function GetMonthTurnOverByPage(pageIndex,pageType){
+        return localHttp.post("/Order/GetMonthTurnOverByPage",{"pageIndex":pageIndex,"pageType":pageType})
+    }
     function ProductGetAll(){
         return localHttp.post("/Product/GetAll")
     }
@@ -27,16 +30,30 @@ import axios from 'axios'
     function AddCard(tel,name,account){
         return localHttp.post("/Card/AddCard",{ "Tel":tel,"Name":name,"Account":account})
     }
+    function CashPay(sum,items){
+        return localHttp.post("/Order/CashPay",{Sum:sum,Items:items})
+    }
+    function GetProductByName(name){
+        return localHttp.get("/Product/GetByName?name="+name)
+    }
+    function ProductUpdate(id,name,price,num){
+        return localHttp.post("/Product/Update",{name:name,id:id,price:price,num:num})
+    }
     // 暴露出这些属性和方法
     export default {
         GetTurnOverDays,
         GetTurnOverMonths,
         GetDayTurnOverByPage,
+        GetMonthTurnOverByPage,
         ProductGetAll,
         ProductAdd,
         Pay,
         GetAllCard,
-        AddCard
+        AddCard,
+        CashPay,
+        GetProductByName,
+        ProductUpdate
+        
 
     }
 </script>

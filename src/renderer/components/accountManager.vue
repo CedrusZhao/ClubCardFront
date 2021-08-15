@@ -1,6 +1,6 @@
 <template>
-  <div >
-    <a-layout>
+  <div style="height:100%">
+    <a-layout style="height:100%">
       <a-layout-header style="text-align:center" ><h1 style="color:white">账号管理</h1></a-layout-header>
         <div style="width:80%;margin: 20px auto">
           <a-row style="margin-top:10px">

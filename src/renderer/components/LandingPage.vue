@@ -1,26 +1,59 @@
 <template>
   
-  
-  <div id="content" style="width:80%;margin: 20px auto">
-    <a-row :gutter=10 >
-      <a-col :span="8"> <a-input v-model="input" placeholder="请输入内容"></a-input> </a-col>
-      <a-col :span="4"> <a-button>搜索</a-button> </a-col>
+  <div id="content" style="padding-left:5px;padding-right:5px;height:98%;padding-top:5px">
+   
+    <a-row style="height:100%" :gutter="16" type="flex"  justify="center">
+        <a-col span="15"  class="gutter-row" style="height:100%">
+            <div style="background-color:#FFFFFF;height:100%">
+                <div style="padding-top:10px">
+                    <h2>已选商品</h2>
+                </div>
+                <a-table :columns="columns" :data-source="selectedProductList" :pagination="false">
+                    <span slot="action" slot-scope="text, record">
+                        <a @click="deleteRecord(record)">Delete</a>
+                    </span>
+                    <template slot="Num" slot-scope="text, record">
+                    
+                       <a-icon @click="plus(record)" type="plus" />
+                           {{text}}
+                       <a-icon @click="minus(record)" type="minus" />
+                    </template>
+                    <span slot="sum" slot-scope="text,record">
+                        {{record.Num * record.Price}}
+                    </span>   
+                </a-table>
+                <a-row type="flex" justify="end">
+                    <a-col span="5">
+                       <h2> {{productSum()}}元</h2>
+                    </a-col>
+                    
+                </a-row>
+
+                <a-row type="flex"  justify="end" style="margin-top:10px">
+                    <a-col span="5"><a-button @click="cashPay">现金支付</a-button></a-col>
+                    <a-col span="5"><a-button v-on:click="pay">刷卡支付</a-button></a-col>
+                </a-row>
+            </div>
+       </a-col>
+     
+        <a-col span="9"  style="height:100%" >
+            <div style="background-color:#FFFFFF;height:100%">
+                <div style="padding-top:10px">
+                    <h2>商品列表</h2>
+                </div>
+                <a-row :gutter=10 >
+                    <a-col :span="9"> <a-input v-model="input" placeholder="请输入内容"></a-input> </a-col>
+                    <a-col :span="4"> <a-button @click="search">搜索</a-button> </a-col>
+                </a-row>
+                <a-table :columns="ProductColumns" :data-source="data" :customRow="customRow">
+                </a-table>
+            </div>
+        </a-col>
+     
     </a-row>
 
-    <a-row style="margin-top:10px">
-      <a-table :columns="columns" :data-source="data">
-      </a-table>
-    </a-row>
-
-    <a-row type="flex"  justify="end" style="margin-top:10px">
-      <a-col span="3"><h2>共计2件</h2></a-col>
-      <a-col span="3"><h2>总价60元</h2></a-col>
-      <a-col span="3"><a-button>现金支付</a-button></a-col>
-       <a-col span="3"><a-button v-on:click="pay">刷卡支付</a-button></a-col>
-    </a-row>
-    <a-modal v-model="visible" title="支付结果" @ok="handleOk">
-      <p>{{this.payResult}}</p>
-    </a-modal>
+   
+   
   </div>
 </template>
 
@@ -29,28 +62,47 @@
 const columns = [
   {
     title: '产品名称',
-    dataIndex: 'name',
-    key: 'name',
-    slots: { title: 'customTitle' },
+    dataIndex: 'Name',
+    key: 'Name',
+  },
+  {
+    title: '单价',
+    dataIndex: 'Price',
+    key: 'Price',
+  },
+  {
+    title: '数量',
+    dataIndex: 'Num',
+    key: 'Num',
+    scopedSlots: { customRender: 'Num' },
+  },
+  {
+    title: '合计',
+    key: 'sum',
+    dataIndex: 'sum',
+     scopedSlots: { customRender: 'sum' },
+  },
+  {
+    title: '操作',
+    key: 'action',
+    dataIndex: 'action',
+    scopedSlots: { customRender: 'action' },
+  }
+];
+const ProductColumns =[
+     {
+    title: '产品名称',
+    dataIndex: 'Name',
+    key: 'Name',
+   
    
   },
   {
     title: '单价',
-    dataIndex: 'price',
-    key: 'price',
+    dataIndex: 'Price',
+    key: 'Price',
   },
-  {
-    title: '数量',
-    dataIndex: 'num',
-    key: 'num',
-  },
-  {
-    title: '总价',
-    key: 'sum',
-    dataIndex: 'sum',
-    
-  }
-];
+]
 
 const data = [
   {
@@ -74,31 +126,108 @@ const data = [
     
 	  data(){
 	    return{
-		  data,
-      visible:false,
-      payResult:"付款成功",
-      columns,
-      input : ""
+            data,
+         
+           
+            columns,
+            input : "",
+            selectedProductList:[],
+            ProductColumns
 		}
 	},
+    mounted(){
+        this.COMMON.ProductGetAll().then(res=>{
+            if (res.data.ok){
+                this.data = res.data.data
+                this.data = this.data.map(x=>{
+                     x.Num=1
+                     return x})
+            }else{
+                 this.$message.error(res.data.err)
+            }
+        })
+    },
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
       },
       pay(){
-        
-         this.COMMON.Pay(60,[{Name:"wash",Num:10,Price:3},{Name:"tag",Num:10,Price:3}]).then(res=>{
-           console.log(res)
-           if (!res.data.ok){
-             this.payResult=res.data.err
-             this.visible=true
-           }
-         })
-          
+        this.COMMON.Pay(this.productSum(),this.selectedProductList).then(res=>{
+      
+        if (!res.data.ok){
+           
+              this.$message.error(res.data.err)
+        }else{
+            this.selectedProductList=[]
+            this.$message.info("pay success")
+        }
+        })
       },
-      handleOk(){
-          this.visible=false
-      }
+      cashPay(){
+          this.COMMON.CashPay(this.productSum(),this.selectedProductList).then(res=>{
+            if (!res.data.ok){
+            
+             this.$message.error(res.data.err)
+            }else{
+            this.selectedProductList=[]
+            this.$message.info("pay success")
+            }
+      
+          })
+      },
+      customRow(record, index){
+          return {
+              on:{
+                  click:event=>{
+                      this.selectedProductList.push(record)
+                  }
+              }
+          }
+      },
+    deleteRecord(record){
+    
+        var index =0
+        for (var i=0;i<this.selectedProductList.length;i++){
+            if (record.name==this.selectedProductList[i].name){
+                index = i
+                break
+            }
+        }
+        this.selectedProductList.splice(index,1)
+
+    },
+    plus(record){
+        console.log("pluus")
+        var index = this.selectedProductList.indexOf(record)
+        console.log(index)
+        this.selectedProductList[index].Num +=1
+       
+    },
+    minus(record){
+         var index = this.selectedProductList.indexOf(record)
+        this.selectedProductList[index].Num -=1
+    },
+    productSum(){
+        let sum =0
+        this.selectedProductList.forEach(item=>{
+            sum += item.Num * item.Price
+        })
+        return sum
+    },
+    search(){
+        this.COMMON.GetProductByName(this.input).then(res=>{
+            if (res.data.ok){
+                 this.data = res.data.data
+                this.data = this.data.map(x=>{
+                     x.Num=1
+                     return x})
+
+            }else{
+                this.$message.error(res.data.data.err)
+            }
+        })
+    }
+
       
     }
   }

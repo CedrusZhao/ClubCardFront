@@ -64,7 +64,7 @@ function startRenderer () {
       {
         contentBase: path.join(__dirname, '../'),
         quiet: true,
-        hot: true,
+        // hot: true,
         proxy: {
           '/AddCard': {
             // 请求的目标服务器地址
@@ -81,7 +81,7 @@ function startRenderer () {
           }
         },
         before (app, ctx) {
-          // app.use(hotMiddleware)
+          app.use(hotMiddleware)
           ctx.middleware.waitUntilValid(() => {
             resolve()
           })
